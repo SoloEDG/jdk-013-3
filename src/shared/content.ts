@@ -1,4 +1,4 @@
-import type { Chapter, Hotspot, Person } from "./types";
+import type { Chapter, Hotspot, Person, SoundSourceConfig } from "./types";
 export const chapters: Chapter[] = [
   {
     id: "dawn",
@@ -104,6 +104,86 @@ export const hotspots: Hotspot[] = [
     pitch: 0,
     summary: "许岚把每一次灯光亮起，都当成一次与远方的约定。",
     personId: "xu",
+  },
+];
+/**
+ * 可探索的空间声音现场：钟声、船声与人物声音各自拥有固定方位（yaw/pitch）
+ * 与有效时间窗（start/end），方位与其屏幕热点完全一致。
+ */
+export const soundSources: SoundSourceConfig[] = [
+  {
+    id: "fisher-voice",
+    chapterId: "dawn",
+    hotspotId: "fisher",
+    label: "守潮人的声音",
+    kind: "voice",
+    start: 0,
+    end: 19,
+    yaw: 0,
+    pitch: 0,
+    priority: 100,
+  },
+  {
+    id: "boat-hum",
+    chapterId: "dawn",
+    hotspotId: "boat",
+    label: "渔船引擎与水声",
+    kind: "boat",
+    start: 4,
+    end: 24,
+    yaw: 48,
+    pitch: -8,
+    priority: 60,
+    src: "/media/audio/boat-ambience.wav",
+  },
+  {
+    id: "harbor-bell",
+    chapterId: "dawn",
+    hotspotId: "bell",
+    label: "归航钟声",
+    kind: "bell",
+    start: 10,
+    end: 24,
+    yaw: -42,
+    pitch: 5,
+    priority: 80,
+    period: 3.5,
+  },
+  {
+    id: "maker-voice",
+    chapterId: "craft",
+    hotspotId: "maker",
+    label: "造船人的声音",
+    kind: "voice",
+    start: 0,
+    end: 24,
+    yaw: 0,
+    pitch: 0,
+    priority: 100,
+  },
+  {
+    id: "plane-tools",
+    chapterId: "craft",
+    hotspotId: "tools",
+    label: "刨木声",
+    kind: "tool",
+    start: 6,
+    end: 24,
+    yaw: 38,
+    pitch: -4,
+    priority: 55,
+  },
+  {
+    id: "keeper-voice",
+    chapterId: "night",
+    hotspotId: "light",
+    label: "守望者的声音",
+    kind: "voice",
+    start: 0,
+    end: 24,
+    yaw: 0,
+    pitch: 0,
+    priority: 100,
   },
 ];
 export const people: Person[] = [

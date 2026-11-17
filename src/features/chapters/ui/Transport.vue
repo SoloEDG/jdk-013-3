@@ -11,7 +11,12 @@ import { timecode } from "../../../shared/format";
 import { chapterProgress } from "../lib/timeline";
 import type { Playback } from "../model/playback";
 defineProps<{ playback: Playback; disabled: boolean }>();
-defineEmits<{ reset: []; fullscreen: [] }>();
+const emit = defineEmits<{
+  reset: [];
+  fullscreen: [];
+  scrubStart: [];
+  scrubEnd: [time: number];
+}>();
 </script>
 <template>
   <div class="transport">
@@ -31,7 +36,14 @@ defineEmits<{ reset: []; fullscreen: [] }>();
       step="0.1"
       :value="playback.state.time"
       :disabled="disabled"
+      @pointerdown="emit('scrubStart')"
       @input="playback.seek(Number(($event.target as HTMLInputElement).value))"
+      @change="
+        emit(
+          'scrubEnd',
+          Number(($event.target as HTMLInputElement).value),
+        )
+      "
     />
     <div class="controls">
       <button

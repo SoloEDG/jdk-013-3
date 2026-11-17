@@ -49,6 +49,7 @@ defineEmits<{ back: [] }>();
           下一段 <ArrowRight :size="14" /></button
         ><button v-else @click="$emit('back')">结束访谈 ↗</button>
       </div>
+      <slot />
     </div>
   </section>
 </template>

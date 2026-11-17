@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
   Waves,
   ArrowUpRight,
@@ -17,11 +17,34 @@ import { ChapterList, MediaPlayer, Transport } from "../features/chapters";
 import { HotspotLayer, HotspotDetail } from "../features/hotspots";
 import { InterviewPanel, PeopleList } from "../features/interviews";
 import { JournalPanel } from "../features/journal";
+import { SoundStatus, SpeechBar } from "../features/spatialaudio";
+import { soundSources } from "../shared/content";
 import { createWorkspace } from "./workspace";
 const w = createWorkspace(),
   about = ref(false),
   stage = ref<HTMLElement>(),
   fullError = ref("");
+
+// 正在发声的热点 id，用于热点脉冲与真实播放状态一致
+const soundingIds = computed(
+  () =>
+    new Set(
+      w.audio.status.sources
+        .filter((s) => s.state === "sounding")
+        .map((s) => soundSources.find((c) => c.id === s.id)?.hotspotId)
+        .filter((id): id is string => !!id),
+    ),
+);
+
+// 手机/浏览器首次需要用户手势才能发声：任意一次点击都尝试解锁
+function unlockOnGesture() {
+  void w.audio.unlock();
+}
+onMounted(() => document.addEventListener("pointerdown", unlockOnGesture));
+onUnmounted(() =>
+  document.removeEventListener("pointerdown", unlockOnGesture),
+);
+
 async function fullscreen() {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -85,10 +108,12 @@ async function fullscreen() {
                   {{ w.playback.chapter.value.location }}</span
                 >
               </div>
+              <SoundStatus :engine="w.audio" />
               <HotspotLayer
                 :items="w.discovery.visible.value"
                 :camera="w.camera.camera"
                 :enabled="w.discovery.enabled.value && !w.branch.personId.value"
+                :sounding="soundingIds"
                 @open="w.dispatch({ type: 'hotspot', id: $event })"
               />
               <div class="scene-caption">
@@ -117,11 +142,15 @@ async function fullscreen() {
             /><InterviewPanel
               :branch="w.branch"
               @back="w.dispatch({ type: 'return' })"
-            /><Transport
+            ><SpeechBar :engine="w.audio" :branch="w.branch"
+          /></InterviewPanel>
+            <Transport
               :playback="w.playback"
               :disabled="!!w.branch.personId.value"
               @reset="w.camera.reset()"
               @fullscreen="fullscreen"
+              @scrub-start="w.audio.scrubTo(w.playback.state.chapterId, w.playback.state.time)"
+              @scrub-end="w.dispatch({ type: 'seek', time: $event })"
             />
             <p v-if="fullError" role="status">{{ fullError }}</p>
           </section>
@@ -205,7 +234,7 @@ async function fullscreen() {
           以海港、木船与灯塔为线索的互动纪录片演示。全景为原创程序绘制示意场景，章节影像为本地生成的潮汐动画；人物与口述内容均为虚构，用于体验非线性叙事。
         </p>
         <p>
-          拖动环顾四周，滚轮调整视角；点击热点发现支线，返回主线继续观看。探索记录仅保存在此浏览器中。
+          拖动环顾四周，滚轮调整视角；点击热点发现支线，返回主线继续观看。探索记录仅保存在此浏览器中。钟声、船声与人声拥有固定方位与时间窗，首次点击后开启空间声音。
         </p>
         <button class="primary" @click="about = false">开始探索 ↗</button>
       </section>

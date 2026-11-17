@@ -7,6 +7,7 @@ const props = defineProps<{
   items: Hotspot[];
   camera: Camera;
   enabled: boolean;
+  sounding?: Set<string>;
 }>();
 defineEmits<{ open: [id: string] }>();
 const host = ref<HTMLElement>(),
@@ -38,6 +39,7 @@ onUnmounted(() => observer?.disconnect());
         :key="h.id"
         v-show="position(h).visible"
         class="hotspot"
+        :class="{ sounding: sounding?.has(h.id) }"
         :style="{ left: position(h).x + 'px', top: position(h).y + 'px' }"
         @pointerdown.stop
         @click.stop="$emit('open', h.id)"
